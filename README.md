@@ -18,3 +18,8 @@ We create a programm structured as follows:
 | MARCO | LUCA | FRANCESCO |
 | :----: | :---: | :---: |
 | measurements | processing | preprocessing
+
+## Hours worked
+| MARCO | LUCA | FRANCESCO |
+| :----: | :---: | :---: |
+| XXX  | XXX | XXX
