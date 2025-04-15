@@ -4,42 +4,17 @@ Project for Computer Vision by Professor Ghidoni S. for class of 2025 in master 
 ## Structure
 The project it's writte in **C++** (stdandard 17), it uses only **OpenCV** library version 4.5.X and other basic standard libraries.
 
-We create two executables:
-- **Trainer** for training the [Cascade Classifier](https://docs.opencv.org/3.4/db/d28/tutorial_cascade_classifier.html) and generating the model.
-- **Detector** for running the model loaded from file and locating known objects in an input image and calculating the pereformance measurements.
-
-| Trainer | Detector |
-| --  | --  |
-| Reading Dataset | Cli execution selector |
-| Cascade Classifier  | Execution of model |
-| Write module  | Performance measurenements (MIOU and accuracy) |
-||Print of result|
-
-### Trainer 
-1. Reading Dataset: 
-    - input: 
-    - output:
-2. Cascade Classifier:
-    - input:
-    - output:
-3. Write Module: 
-    - input:
-    - output: 
-
-### Detector
-1. Cli execution selector: 
-    - input: 
-    - output:
-2. Execution of model:
-    - input:
-    - output:
-3. Performance measurenements: 
-    - miou
-        - input:
-        - output: 
+We create a programm structured as follows:
+- **preprocessing**:
+    - input of cli command for choosing the folder of the desired object
+    - preprocessing of images inside *models folder* using the mask to obtain the rectangle that encapsulate the object
+- **processing** of each image inside *test folder*:
+    - we compute features using **surf** and we do *feature maching* using **flann matcher** 
+    - we compute the bounding box using **homography** approach
+- **measurements** of performances:
+    - mIoU 
     - accuracy
-        - input:
-        - output:
-4. Print results:
-    - input:
-    - output:
+
+| MARCO | LUCA | FRANCESCO |
+| :----: | :---: | :---: |
+| measurements | processing | preprocessing
