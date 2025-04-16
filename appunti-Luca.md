@@ -25,6 +25,8 @@ public:
 private:
     std::string img_id;
     // We need the image ID in order to write its associated txt file with the output of the detector
+    // e.g. image filename: "4_0001_000121-color.jpg" -> ID: "4_0001_000121"
+    // -> txt file: "4_0001_000121-detect.txt" (in the output directory)
     cv::Mat img;
 }
 ```
