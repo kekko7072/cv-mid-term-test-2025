@@ -76,11 +76,11 @@ void process_images(int obj_type, const fs::path& dataset_dir)
     
     for (TestImage image : test_images)
     {
-        std::vector<cv::Point2i> bound_box_coord = detect(obj_type, cropped_models, image);
+        std::vector<cv::Point2i> bound_box_coord = detect(cropped_models, image);
         // bound_box_coord either is empty (no object detected) or contains to points
         // (coordinates of the bounding box)
         
-        write_image_output(dataset_dir, image, obj_type, bound_box_coord);
+        write_image_output(dataset_dir, image, obj_type_str, bound_box_coord);
     }
 }
 ```
@@ -102,12 +102,12 @@ bool mk_output_dir(const fs::path& dataset_dir)
     // Create the output directory; return true if successful, otherwise return false
 }
 
-std::vector<cv::Point2i> bound_box_coord = detect(int obj_type, const std::vector<cv::Mat>& cropped_models, const TestImage& image)
+std::vector<cv::Point2i> detect(const std::vector<cv::Mat>& cropped_models, const TestImage& image)
 {
     // Detect the object of the specificied type in the given image, using the provided models.
     // If the object is detected, return a vector of two points (coordinates of the bounding box);
     // otherwise (object not detected) return an empty vector.
 }
 
-void write_image_output(const fs::path& dataset_dir, const TestImage& image, int obj_type, const std::vector<cv::Point2i>& bound_box_coord)
+void write_image_output(const fs::path& dataset_dir, const TestImage& image, std::string obj_type_str, const std::vector<cv::Point2i>& bound_box_coord)
 ```
