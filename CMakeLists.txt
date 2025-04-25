@@ -13,15 +13,14 @@ include_directories(include)
 
 add_executable(detector
     src/main.cpp
-    include/processing.h
+    src/preprocessing.cpp
     src/processing.cpp
-    include/testimage.h
     include/testimage.cpp
 )
 target_link_libraries(detector ${OpenCV_LIBS})
 
-# For testing
-add_executable(test
-    test/KAZE_FLANN_matching_homography_Demo.cpp
+add_executable(preprocessing
+    src/preprocessing_main.cpp
+    src/preprocessing.cpp
 )
-target_link_libraries(test ${OpenCV_LIBS})
+target_link_libraries(preprocessing ${OpenCV_LIBS})

@@ -22,4 +22,4 @@ We create a programm structured as follows:
 ## Hours worked
 | MARCO | LUCA | FRANCESCO |
 | :----: | :---: | :---: |
-| XXX  | XXX | XXX
+| XXX  | XXX | 2
