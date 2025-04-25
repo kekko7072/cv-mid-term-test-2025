@@ -19,18 +19,27 @@
 void process_images(int obj_type, const std::filesystem::path &dataset_dir);
 
 /**
- * @brief Load cropped models from default location: dataset_dir/models/cropped/
+ * @brief Load cropped models from default location: dataset_dir/obj_type_str/models/cropped/
+ * @param obj_type_str String ID of the object type we want to detect
  * @param dataset_dir Directory of the dataset being processed
  * @return Vector of cv::Mat objects, each containing a model
  */
-std::vector<cv::Mat> load_cropped_models(const std::filesystem::path &dataset_dir);
+std::vector<cv::Mat> load_cropped_models(std::string obj_type_str, const std::filesystem::path &dataset_dir);
 
 /**
- * @brief Load test images from default location: dataset_dir/test_images/
+ * @brief Load test images from default location: dataset_dir/obj_type_str/test_images/
+ * @param obj_type_str String ID of the object type we want to detect
  * @param dataset_dir Directory of the dataset being processed
  * @return Vector of TestImage objects
  */
-std::vector<TestImage> load_test_images(const std::filesystem::path &dataset_dir);
+std::vector<TestImage> load_test_images(std::string obj_type_str, const std::filesystem::path &dataset_dir);
+
+/**
+ * @brief get_img_id
+ * @param filename
+ * @return
+ */
+std::string get_img_id(const std::filesystem::path &filename);
 
 /**
  * @brief Create the output directory
