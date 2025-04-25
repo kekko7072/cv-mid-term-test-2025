@@ -19,9 +19,9 @@ using std::endl;
 int main(int argc, char *argv[])
 {
     // Preprocessing
-    USER_RETURN result = ask_user();
-    cout << "\nSelected object type: " << static_cast<int>(result.type) << endl;
-    cout << "Directory: " << result.directory << endl;
+    USER_RETURN object_type = ask_user();
+    cout << "\nSelected object type: " << static_cast<int>(object_type.type) << endl;
+    cout << "Directory: " << object_type.directory << endl;
     
     // Processing
     process_images(object_type.type, object_type.directory);
