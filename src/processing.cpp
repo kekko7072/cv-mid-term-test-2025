@@ -75,7 +75,7 @@ std::vector<TestImage> load_test_images(const fs::path &dataset_dir)
     return std::vector<TestImage>();
 }
 
-bool mk_output_dir(const std::filesystem::__cxx11::path &dataset_dir)
+bool mk_output_dir(const fs::path &dataset_dir)
 {
     cerr << "mk_output_dir: not implemented yet!\n";
     return false;

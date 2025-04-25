@@ -46,3 +46,6 @@ _deps
 
 # Linux
 .directory
+
+# Build
+build/
