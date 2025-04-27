@@ -1,6 +1,7 @@
 // Author: Marco Carraro
 
 #include "measurement.h"
+#include "enumobjtype.h"
 
 #include <iostream>
 #include <fstream>  // Necessary to operate with text files
@@ -9,6 +10,9 @@
 
 namespace fs = std::filesystem;
 using namespace std;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 int box_area(int obj_type, const fs::path &text_file)
 {
@@ -31,16 +35,16 @@ int box_area(int obj_type, const fs::path &text_file)
             throw invalid_argument("Unknown object type");
     }
 
-    if(text_file.is_open()){      // Check if the file opens correctly
+    if(input_file.is_open()){      // Check if the file opens correctly
         while(getline(input_file, line)){
-            if(line.find(obj_type_str) == obj_type_str){    // Check to pick the correct object
+            if(line.find(obj_type_str) != string::npos){    // Check to pick the correct object
                 istringstream str_split(line);  // Convert the line into a stream in order to save the values
 
                 str_split >> obj_name >> x_min >> y_min >> x_max >> y_max;
             }
         }
 
-        text_file.close();
+        input_file.close();
     } else{
         cerr << "Unable to open the file: " << text_file << endl;
         return -1;
@@ -51,7 +55,7 @@ int box_area(int obj_type, const fs::path &text_file)
     return area;
 }
 
-int intersection_box(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int intersection_area(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     string obj_type_str, obj_name, line;
     int x_min_gt, y_min_gt, x_max_gt, y_max_gt;
@@ -76,7 +80,7 @@ int intersection_box(int obj_type, const fs::path &dataset_box, const fs::path &
 
     if(dataset_file.is_open()){      // Check if the file opens correctly
         while(getline(dataset_file, line)){
-            if(line.find(obj_type_str) == obj_type_str){    // Check to pick the correct object
+            if(line.find(obj_type_str) != string::npos){    // Check to pick the correct object
                 istringstream str_split(line);  // Convert the line into a stream in order to save the values
 
                 str_split >> obj_name >> x_min_gt >> y_min_gt >> x_max_gt >> y_max_gt;
@@ -85,13 +89,13 @@ int intersection_box(int obj_type, const fs::path &dataset_box, const fs::path &
 
         dataset_file.close();
     } else{
-        cerr << "Unable to open the file: " << text_file << endl;
+        cerr << "Unable to open the file: " << dataset_box << endl;
         return -1;
     }
 
     if(pred_file.is_open()){      // Check if the file opens correctly
         while(getline(pred_file, line)){
-            if(line.find(obj_type_str) == obj_type_str){    // Check to pick the correct object
+            if(line.find(obj_type_str) != string::npos){    // Check to pick the correct object
                 istringstream str_split(line);  // Convert the line into a stream in order to save the values
 
                 str_split >> obj_name >> x_min_pred >> y_min_pred >> x_max_pred >> y_max_pred;
@@ -100,7 +104,7 @@ int intersection_box(int obj_type, const fs::path &dataset_box, const fs::path &
 
         pred_file.close();
     } else{
-        cerr << "Unable to open the file: " << text_file << endl;
+        cerr << "Unable to open the file: " << predicted_box << endl;
         return -1;
     }
     
@@ -145,7 +149,7 @@ float IoU(int obj_type, const fs::path &dataset_box, const fs::path &predicted_b
     return iou_value;
 }
 
-float mIoU(int obj_type, int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+float mIoU(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     int file_count= 0;
     float total_IoU = 0;
@@ -212,7 +216,7 @@ float accuracy(int obj_type, const fs::path &dataset_box, const fs::path &predic
         }
     }
 
-    float acc = acc / file_count;
+    acc = acc / file_count;
     
     return acc;
 }

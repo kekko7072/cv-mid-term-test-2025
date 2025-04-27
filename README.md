@@ -1,5 +1,5 @@
 # Computer Vision Project 2025
-Project for Computer Vision by Professor Ghidoni S. for class of 2025 in master degree in Computer Enineering 2025.
+Project for Computer Vision by Professor Ghidoni S. for class of 2025 in master degree in Computer Engineering 2025.
 
 ## Structure
 The project it's writte in **C++** (stdandard 17), it uses only **OpenCV** library version 4.5.X and other basic standard libraries.
@@ -22,4 +22,4 @@ We create a programm structured as follows:
 ## Hours worked
 | MARCO | LUCA | FRANCESCO |
 | :----: | :---: | :---: |
-| XXX  | XXX | 2
+| 6  | XXX | 2
