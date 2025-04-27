@@ -113,7 +113,7 @@ std::vector<TestImage> load_test_images(std::string obj_type_str, const fs::path
 std::string get_img_id(const fs::path &filename)
 {
     std::string str = filename.string();
-    std::string::size_type ext_pos = str.rfind("-");
+    std::string::size_type ext_pos = str.find("-");
     std::string r = str.substr(0, ext_pos);
     return r;
 }
