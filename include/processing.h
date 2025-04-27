@@ -76,9 +76,9 @@ std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, c
  * @param output_dir
  * @param image
  * @param obj_type_str
- * @param bound_box_coord
+ * @param bbox_coord
  */
 void write_image_output(const std::filesystem::path &output_dir, const TestImage &image,
-                        std::string obj_type_str, const std::vector<cv::Point2i> &bound_box_coord);
+                        std::string obj_type_str, const std::vector<cv::Point2i> &bbox_coord);
 
 #endif // PROCESSING_H

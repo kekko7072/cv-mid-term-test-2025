@@ -6,6 +6,7 @@
 #include "structTestImage.h"
 
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
@@ -58,16 +59,16 @@ void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
     if (!mk_output_dir(output_dir))
     {
         cerr << "Unable to create output directory\n";
-//        throw std::exception();
+        throw std::exception();
     }
 
     for (TestImage image : test_images)
     {
-        std::vector<cv::Point2i> bound_box_coord = detect(cropped_models, image);
+        std::vector<cv::Point2i> bbox_coord = detect(cropped_models, image);
         // bound_box_coord either is empty (no object detected) or contains to points
         // (coordinates of the bounding box)
 
-        write_image_output(output_dir, image, obj_type_str, bound_box_coord);
+        write_image_output(output_dir, image, obj_type_str, bbox_coord);
     }
 }
 
@@ -163,7 +164,16 @@ std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, c
 }
 
 void write_image_output(const fs::path &output_dir, const TestImage &image,
-                        std::string obj_type_str, const std::vector<cv::Point2i> &bound_box_coord)
+                        std::string obj_type_str, const std::vector<cv::Point2i> &bbox_coord)
 {
-    cerr << "write_image_output: not implemented yet!\n";
+    const std::string output_filename = image.id + "-detected.txt";
+    const fs::path output_filepath = output_dir / output_filename;
+    std::fstream fs {output_filepath, std::ios::out};
+    if (!bbox_coord.empty())
+    {
+        fs << obj_type_str << " ";
+        fs << bbox_coord[0].x << " " << bbox_coord[0].y << " ";
+        fs << bbox_coord[1].x << " " << bbox_coord[1].y;
+    }
+    fs << endl;
 }
