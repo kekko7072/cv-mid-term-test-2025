@@ -18,7 +18,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-void process_images(int obj_type, const fs::path &dataset_dir)
+void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
 {
     std::string obj_type_str;
     switch (obj_type)
@@ -138,7 +138,7 @@ bool mk_output_dir(const fs::path &dataset_dir)
     return false;
 }
 
-std::vector<cv::Point2i> detect(const std::vector<cv::Mat> &cropped_models, const TestImage &image)
+std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image)
 {
     cerr << "detect: not implemented yet!\n";
     return std::vector<cv::Point2i>();

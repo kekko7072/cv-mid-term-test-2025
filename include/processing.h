@@ -18,7 +18,7 @@
  * @param obj_type One of the possible value of enum `OBJTYPE`
  * @param dataset_dir Directory of the dataset being processed
  */
-void process_images(int obj_type, const std::filesystem::path &dataset_dir);
+void process_images(OBJTYPE obj_type, const std::filesystem::path &dataset_dir);
 
 /**
  * @brief Load cropped models from default location: dataset_dir/obj_type_str/models/cropped/
