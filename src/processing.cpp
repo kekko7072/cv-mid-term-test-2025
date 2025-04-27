@@ -20,6 +20,10 @@ using std::endl;
 
 void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
 {
+    if (!dataset_dir.is_absolute())
+    {
+        const fs::path dataset_dir = fs::absolute(dataset_dir);
+    }
     std::string obj_type_str;
     switch (obj_type)
     {
