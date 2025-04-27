@@ -2,6 +2,8 @@
 
 #include "processing.h"
 #include "enumobjtype.h"
+#include "structModelImage.h"
+#include "structTestImage.h"
 
 #include <filesystem>
 #include <iostream>
@@ -34,7 +36,7 @@ void process_images(int obj_type, const fs::path &dataset_dir)
         throw std::invalid_argument("Unknown object type");
     }
 
-    std::vector<cv::Mat> cropped_models = load_cropped_models(obj_type_str, dataset_dir);
+    std::vector<ModelImage> cropped_models = load_cropped_models(obj_type_str, dataset_dir);
     if (cropped_models.empty())
     {
         cerr << "No cropped models\n";
@@ -66,9 +68,9 @@ void process_images(int obj_type, const fs::path &dataset_dir)
 
 /* --------------------------------------------------------------- */
 
-std::vector<cv::Mat> load_cropped_models(std::string obj_type_str, const fs::path &dataset_dir)
+std::vector<ModelImage> load_cropped_models(std::string obj_type_str, const fs::path &dataset_dir)
 {
-    std::vector<cv::Mat> cropped_models;
+    std::vector<ModelImage> cropped_models;
     const fs::path cropped_models_dir = dataset_dir / obj_type_str / "models" / "cropped";
 
     for (const auto &entry : fs::directory_iterator(cropped_models_dir))
@@ -77,18 +79,29 @@ std::vector<cv::Mat> load_cropped_models(std::string obj_type_str, const fs::pat
             fs::path path = entry.path();
             if (path.extension().string() == ".png")
             {
-                cv::Mat img = cv::imread(path.string());
-                cropped_models.push_back(img);
+                ModelImage model;
+                model.filename = path.filename();
+                model.obj_type_str = obj_type_str;
+                model.img = cv::imread(path.string());
+                get_model_viewangles(model);
+                cropped_models.push_back(model);
             }
         }
 
     return cropped_models;
 }
 
+void get_model_viewangles(ModelImage &model)
+{
+    std::string str = model.filename;
+    // e.g. str = "view_0_001_color_cropped.png"
+    int alpha, beta;
+    model.alpha = std::stoi(str.substr(5, 6));
+    model.beta = std::stoi(str.substr(7, 10));
+}
+
 std::vector<TestImage> load_test_images(std::string obj_type_str, const fs::path &dataset_dir)
 {
-//    cerr << "load_test_images: not implemented yet!\n";
-
     std::vector<TestImage> test_images;
     const fs::path test_images_dir = dataset_dir / obj_type_str / "test_images";
 
@@ -99,9 +112,9 @@ std::vector<TestImage> load_test_images(std::string obj_type_str, const fs::path
             fs::path path = entry.path();
             if (path.extension().string() == ".jpg" || path.extension().string() == ".png")
             {
-                std::string img_id = get_img_id(path.filename());
-                cv::Mat img = cv::imread(path.string());
-                TestImage image(img_id, img);
+                TestImage image;
+                image.id = get_img_id(path);
+                image.img = cv::imread(path.string());
                 test_images.push_back(image);
             }
         }
@@ -110,12 +123,13 @@ std::vector<TestImage> load_test_images(std::string obj_type_str, const fs::path
     return test_images;
 }
 
-std::string get_img_id(const fs::path &filename)
+std::string get_img_id(const fs::path &path)
 {
-    std::string str = filename.string();
-    std::string::size_type ext_pos = str.find("-");
-    std::string r = str.substr(0, ext_pos);
-    return r;
+    std::string filename = path.filename().string();
+    // e.g. filename = "4_0001_000121-color.jpg"
+    std::string::size_type pos = filename.find("-");
+    std::string id = filename.substr(0, pos);
+    return id;
 }
 
 bool mk_output_dir(const fs::path &dataset_dir)
