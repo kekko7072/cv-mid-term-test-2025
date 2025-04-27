@@ -54,11 +54,10 @@ std::string get_img_id(const std::filesystem::path &path);
 
 /**
  * @brief Create the output directory
- * @param obj_type_str String ID of the object type we want to detect
- * @param dataset_dir Directory of the dataset being processed
- * @return true if successful
+ * @param output_dir Directory in which to write the output
+ * @return true if successful, or if directory already exists
  */
-bool mk_output_dir(std::string obj_type_str, const std::filesystem::path &dataset_dir);
+bool mk_output_dir(const std::filesystem::path &output_dir);
 
 /**
  * @brief Detect object of the specificied type in the given image, using the provided models
@@ -74,12 +73,12 @@ std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, c
 
 /**
  * @brief write_image_output
- * @param dataset_dir
+ * @param output_dir
  * @param image
  * @param obj_type_str
  * @param bound_box_coord
  */
-void write_image_output(const std::filesystem::path &dataset_dir, const TestImage &image,
+void write_image_output(const std::filesystem::path &output_dir, const TestImage &image,
                         std::string obj_type_str, const std::vector<cv::Point2i> &bound_box_coord);
 
 #endif // PROCESSING_H

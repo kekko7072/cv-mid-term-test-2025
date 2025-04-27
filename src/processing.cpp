@@ -50,7 +50,8 @@ void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
         throw std::exception();
     }
 
-    if (!mk_output_dir(obj_type_str, dataset_dir))
+    const fs::path output_dir = dataset_dir / obj_type_str / "output";
+    if (!mk_output_dir(output_dir))
     {
         cerr << "Unable to create output directory\n";
 //        throw std::exception();
@@ -62,7 +63,7 @@ void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
         // bound_box_coord either is empty (no object detected) or contains to points
         // (coordinates of the bounding box)
 
-        write_image_output(dataset_dir, image, obj_type_str, bound_box_coord);
+        write_image_output(output_dir, image, obj_type_str, bound_box_coord);
     }
 }
 
@@ -132,9 +133,8 @@ std::string get_img_id(const fs::path &path)
     return id;
 }
 
-bool mk_output_dir(std::string obj_type_str, const fs::path &dataset_dir)
+bool mk_output_dir(const fs::path &output_dir)
 {
-    const fs::path output_dir = dataset_dir / obj_type_str / "output";
     if (fs::exists(output_dir))
     {
         if (fs::is_directory(output_dir))
@@ -152,10 +152,13 @@ bool mk_output_dir(std::string obj_type_str, const fs::path &dataset_dir)
 std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image)
 {
     cerr << "detect: not implemented yet!\n";
-    return std::vector<cv::Point2i>();
+    std::vector<cv::Point2i> bbox_corners(2);
+    bbox_corners[0] = cv::Point2i(0, 0);
+    bbox_corners[1] = cv::Point2i(40, 40);
+    return bbox_corners;
 }
 
-void write_image_output(const fs::path &dataset_dir, const TestImage &image,
+void write_image_output(const fs::path &output_dir, const TestImage &image,
                         std::string obj_type_str, const std::vector<cv::Point2i> &bound_box_coord)
 {
     cerr << "write_image_output: not implemented yet!\n";
