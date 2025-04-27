@@ -54,10 +54,11 @@ std::string get_img_id(const std::filesystem::path &path);
 
 /**
  * @brief Create the output directory
+ * @param obj_type_str String ID of the object type we want to detect
  * @param dataset_dir Directory of the dataset being processed
  * @return true if successful
  */
-bool mk_output_dir(const std::filesystem::path &dataset_dir);
+bool mk_output_dir(std::string obj_type_str, const std::filesystem::path &dataset_dir);
 
 /**
  * @brief Detect object of the specificied type in the given image, using the provided models

@@ -50,7 +50,7 @@ void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
         throw std::exception();
     }
 
-    if (!mk_output_dir(dataset_dir))
+    if (!mk_output_dir(obj_type_str, dataset_dir))
     {
         cerr << "Unable to create output directory\n";
 //        throw std::exception();
@@ -132,10 +132,21 @@ std::string get_img_id(const fs::path &path)
     return id;
 }
 
-bool mk_output_dir(const fs::path &dataset_dir)
+bool mk_output_dir(std::string obj_type_str, const fs::path &dataset_dir)
 {
-    cerr << "mk_output_dir: not implemented yet!\n";
-    return false;
+    const fs::path output_dir = dataset_dir / obj_type_str / "output";
+    if (fs::exists(output_dir))
+    {
+        if (fs::is_directory(output_dir))
+        {
+            return true;
+        }
+        else  // exists, but not a directory
+        {
+            return false;
+        }
+    }
+    return fs::create_directory(output_dir);
 }
 
 std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image)
