@@ -2,19 +2,35 @@
 
 Input:
 - object type: one of "004_sugar_box", "006_mustard_bottle" or "035_power_drill"
-- dataset directory:
+- dataset directory: for each object type we have following subdirectories
     - `models` directory
-        - `cropped` directory: color images from the parent directory, cropped (removed extra background around the object)
+        - `cropped` directory
+            - one directory for each model, which contains: cropped color image + cropped mask (black/white) image
     - `labels` directory
     - `test_images` directory
 
 Output:
-- `output` directory: new directory inside dataset directory (`std::filesystem::create_directory()`)
-    - for each test image, a txt file with coordinates of bounding box of detected object
+- inside dataset directory/object-specific directory:
+    - `output` directory: new directory inside dataset directory (`std::filesystem::create_directory()`)
+        - for each test image, a txt file with coordinates of bounding box of detected object
 
 ## Pseudocode:
 
-Class **TestImage**
+Struct **ModelImage**
+```cpp
+struct ModelImage
+{
+    std::string name;
+    std::string obj_type_str;
+    cv::Mat img;
+    cv::Mat mask;
+    int alpha;  // first angle (either 0, 30 or 60)
+    int beta;  // second angle (between 0 and 9)
+};
+```
+
+
+Struct **TestImage**
 ```cpp
 class TestImage {
 public:

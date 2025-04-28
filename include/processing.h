@@ -29,15 +29,6 @@ void process_images(OBJTYPE obj_type, const std::filesystem::path &dataset_dir);
 std::vector<ModelImage> load_cropped_models(std::string obj_type_str, const std::filesystem::path &dataset_dir);
 
 /**
- * @brief Get viewangles (alpha and beta) from model's filename, and save their values into the model
- *
- * alpha = first angle (either 0, 30 or 60)
- * beta = second angle (between 0 and 9)
- * @param model Model image being loaded
- */
-void get_model_viewangles(ModelImage &model);
-
-/**
  * @brief Load test images from default location: dataset_dir/obj_type_str/test_images/
  * @param obj_type_str String ID of the object type we want to detect
  * @param dataset_dir Directory of the dataset being processed

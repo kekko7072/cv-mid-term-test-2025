@@ -13,18 +13,20 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/calib3d.hpp>
 
 namespace fs = std::filesystem;
 using std::cout;
 using std::cerr;
 using std::endl;
 
-void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
+void process_images(OBJTYPE obj_type, const fs::path &data_dir)
 {
-    if (!dataset_dir.is_absolute())
-    {
-        const fs::path dataset_dir = fs::absolute(dataset_dir);
-    }
+    // Ensure we work with absolute paths
+    const fs::path dataset_dir = fs::absolute(data_dir);
+
     std::string obj_type_str;
     switch (obj_type)
     {
@@ -65,9 +67,7 @@ void process_images(OBJTYPE obj_type, const fs::path &dataset_dir)
     for (TestImage image : test_images)
     {
         std::vector<cv::Point2i> bbox_coord = detect(cropped_models, image);
-        // bound_box_coord either is empty (no object detected) or contains to points
-        // (coordinates of the bounding box)
-
+        // bbox_coord contains two points (coordinates of the bounding box)
         write_image_output(output_dir, image, obj_type_str, bbox_coord);
     }
 }
@@ -80,30 +80,27 @@ std::vector<ModelImage> load_cropped_models(std::string obj_type_str, const fs::
     const fs::path cropped_models_dir = dataset_dir / obj_type_str / "models" / "cropped";
 
     for (const auto &entry : fs::directory_iterator(cropped_models_dir))
-        if (entry.is_regular_file())
+    {
+        if (entry.is_directory())
         {
             fs::path path = entry.path();
-            if (path.extension().string() == ".png")
-            {
-                ModelImage model;
-                model.filename = path.filename();
-                model.obj_type_str = obj_type_str;
-                model.img = cv::imread(path.string());
-                get_model_viewangles(model);
-                cropped_models.push_back(model);
-            }
+            std::string path_str = path.string();
+            std::string::size_type pos = path_str.rfind("/");
+            std::string model_name = path_str.substr(pos+1);
+
+            ModelImage model;
+            model.name = model_name;
+            model.obj_type_str = obj_type_str;
+            std::string color_path = path.string() + "/" + "color.png";
+            std::string mask_path = path.string() + "/" + "mask.png";
+            if (!fs::exists(color_path) || !fs::exists(mask_path))
+                continue;
+            model.color = cv::imread(color_path);
+            model.mask = cv::imread(mask_path);
+            cropped_models.push_back(model);
         }
-
+    }
     return cropped_models;
-}
-
-void get_model_viewangles(ModelImage &model)
-{
-    std::string str = model.filename;
-    // e.g. str = "view_0_001_color_cropped.png"
-    int alpha, beta;
-    model.alpha = std::stoi(str.substr(5, 6));
-    model.beta = std::stoi(str.substr(7, 10));
 }
 
 std::vector<TestImage> load_test_images(std::string obj_type_str, const fs::path &dataset_dir)
@@ -156,10 +153,86 @@ bool mk_output_dir(const fs::path &output_dir)
 
 std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image)
 {
-    cerr << "detect: not implemented yet!\n";
+    cout << "Processing test image: " << image.id << endl;
+
+    size_t num_good_matches = 0;
     std::vector<cv::Point2i> bbox_corners(2);
-    bbox_corners[0] = cv::Point2i(0, 0);
-    bbox_corners[1] = cv::Point2i(40, 40);
+
+    for (ModelImage model : cropped_models)
+    {
+//        cout << "model image = " << model.name << endl;
+        cv::Mat obj_color = model.color;
+        cv::Mat obj_mask = model.mask;
+        cv::Mat scene_img = image.img;
+
+        // Detect keypoints in both images (model and scene) and compute descriptors for each of the keypoints
+        cv::Ptr<cv::Feature2D> kaze = cv::KAZE::create();
+        std::vector<cv::KeyPoint> keypoints_obj, keypoints_scene;
+        cv::Mat descriptors_obj, descriptors_scene;
+        kaze->detectAndCompute(obj_color, obj_mask, keypoints_obj, descriptors_obj);
+        kaze->detectAndCompute(scene_img, cv::noArray(), keypoints_scene, descriptors_scene);
+
+        // Find the closest matches between descriptors from the model image to the scene image
+        cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
+        std::vector<cv::DMatch> matches;
+        matcher->match(descriptors_obj, descriptors_scene, matches);
+
+//        cout << "num_good_matches " << num_good_matches << endl;
+//        cout << "matches " << matches.size() << endl;
+        if (matches.size() >= num_good_matches)
+        {
+//            cout << "if entered\n";
+            num_good_matches = matches.size();
+
+            // Localize the object
+            std::vector<cv::Point2f> obj;
+            std::vector<cv::Point2f> scene;
+
+            for( size_t i = 0; i < matches.size(); i++ )
+            {
+                // Get the keypoints from the good matches
+                obj.push_back( keypoints_obj[ matches[i].queryIdx ].pt );
+                scene.push_back( keypoints_scene[ matches[i].trainIdx ].pt );
+            }
+
+            // Get the corners from the object image
+            std::vector<cv::Point2f> obj_corners(4);
+            obj_corners[0] = cv::Point2f(0, 0);
+            obj_corners[1] = cv::Point2f(static_cast<float>(obj_color.cols), 0);
+            obj_corners[2] = cv::Point2f(static_cast<float>(obj_color.cols), static_cast<float>(obj_color.rows));
+            obj_corners[3] = cv::Point2f(0, static_cast<float>(obj_color.rows));
+            std::vector<cv::Point2f> scene_corners(4);
+
+            cv::Mat T = estimateAffine2D( obj, scene, cv::noArray(), cv::RANSAC);
+            transform( obj_corners, scene_corners, T);
+
+            int xmin, ymin, xmax, ymax;
+            xmin = scene_corners[0].x;
+            ymin = scene_corners[0].y;
+            xmax = scene_corners[2].x;
+            ymax = scene_corners[2].y;
+            bbox_corners[0] = cv::Point2i(xmin, ymin);
+            bbox_corners[1] = cv::Point2i(xmax, ymax);
+
+//            cv::Mat bbox = scene_img.clone();
+//            cv::rectangle(bbox, bbox_corners[0], bbox_corners[1], /*color=*/ cv::Scalar(0, 255, 0), /*thickness=*/ 4);
+//            cv::namedWindow("bbox", cv::WINDOW_NORMAL);
+//            cv::imshow("bbox", bbox);
+//            cv::waitKey(0);
+        }
+
+
+    }
+    // Draw matches
+//            cv::Mat img_matches;
+//            cv::drawMatches(obj_img, keypoints_obj, scene_img, keypoints_scene, matches, img_matches,
+//                            cv::Scalar::all(-1), cv::Scalar::all(-1),
+//                            std::vector<char>()/*, DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS*/);
+    //        cv::Point2f offset {static_cast<float>(obj_img.cols), 0};
+    //        cv::rectangle(img_matches, scene_corners[0] + offset, scene_corners[2] + offset,
+    //                      /*color=*/ cv::Scalar(0, 255, 0), /*thickness=*/ 4);
+
+//    cout << "returning bbox_corners = [" << bbox_corners[0] << ", " << bbox_corners[1] << "]\n";
     return bbox_corners;
 }
 
