@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -207,10 +208,10 @@ std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, c
             transform( obj_corners, scene_corners, T);
 
             int xmin, ymin, xmax, ymax;
-            xmin = scene_corners[0].x;
-            ymin = scene_corners[0].y;
-            xmax = scene_corners[2].x;
-            ymax = scene_corners[2].y;
+            xmin = std::min(scene_corners[0].x, scene_corners[2].x);
+            ymin = std::min(scene_corners[0].y, scene_corners[2].y);
+            xmax = std::max(scene_corners[0].x, scene_corners[2].x);
+            ymax = std::max(scene_corners[0].y, scene_corners[2].y);
             bbox_corners[0] = cv::Point2i(xmin, ymin);
             bbox_corners[1] = cv::Point2i(xmax, ymax);
         }
