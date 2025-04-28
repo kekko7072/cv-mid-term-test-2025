@@ -188,7 +188,9 @@ float mIoU(vector<float> iou, int number_of_files)
     float total_IoU = 0;
     
     for(int i = 0; i < number_of_files; i++){
-        total_IoU = total_IoU + iou[i];
+        if(iou[i] > 0){
+            total_IoU = total_IoU + iou[i];
+        }
     }
 
     float mean_IoU = total_IoU / number_of_files;
