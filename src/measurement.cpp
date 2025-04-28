@@ -15,36 +15,10 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-void performance_evaluation(OBJTYPE obj_type, const fs::path &dataset_dir, const fs::path &predicted_dir)
+void performance_evaluation(OBJTYPE obj_type, const fs::path &dataset_dir)
 {
-    int number_of_files = number_images(obj_type, dataset_dir);
+    string obj_type_str;
 
-    vector<float> iou(number_of_files);
-
-    int temp_acc = 0;
-    float miou, acc;
-
-    for(int i = 0; i < number_of_files; i++){
-        iou[i] = IoU(obj_type, dataset_dir, predicted_dir);
-        temp_acc = accuracy(iou[i]);
-    }
-
-    miou = mIoU(iou, number_of_files);
-    acc = temp_acc / number_of_files;
-
-    write_performance(obj_type, dataset_dir, miou, acc);
-
-    cout << "mean Intersection over Union: " << miou << endl;
-    cout << "Accuracy: " << acc << endl;
-}
-
-int box_area(OBJTYPE obj_type, const fs::path &text_file)
-{
-    string obj_type_str, obj_name, line;      // obj_name to compare the name of the object we are evaluating, line to read one string at the time if there are more than one object in the text file
-    int x_min, y_min, x_max, y_max;
-
-    ifstream input_file(text_file);
-    
     switch (obj_type){
         case OBJTYPE::BOX:
             obj_type_str = "004_sugar_box";
@@ -58,6 +32,37 @@ int box_area(OBJTYPE obj_type, const fs::path &text_file)
         default:
             throw invalid_argument("Unknown object type");
     }
+
+    const fs::path prediction_dir = dataset_dir / obj_type_str / "output";
+    const fs::path dataset_path = dataset_dir / obj_type_str / "labels";
+
+    int number_of_files = number_images(obj_type_str, dataset_dir);
+
+    vector<float> iou(number_of_files);
+
+    int temp_acc = 0;
+    float miou, acc;
+
+    for(int i = 0; i < number_of_files; i++){
+        iou[i] = IoU(obj_type_str, dataset_path, prediction_dir);
+        temp_acc = accuracy(iou[i]);
+    }
+
+    miou = mIoU(iou, number_of_files);
+    acc = temp_acc / number_of_files;
+
+    write_performance(obj_type_str, dataset_dir, miou, acc);
+
+    cout << "mean Intersection over Union: " << miou << endl;
+    cout << "Accuracy: " << acc << endl;
+}
+
+int box_area(std::string obj_type_str, const fs::path &text_file)
+{
+    string obj_name, line;      // obj_name to compare the name of the object we are evaluating, line to read one string at the time if there are more than one object in the text file
+    int x_min, y_min, x_max, y_max;
+
+    ifstream input_file(text_file);
 
     if(input_file.is_open()){      // Check if the file opens correctly
         while(getline(input_file, line)){
@@ -79,28 +84,14 @@ int box_area(OBJTYPE obj_type, const fs::path &text_file)
     return area;
 }
 
-int intersection_area(OBJTYPE obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int intersection_area(string obj_type_str, const fs::path &dataset_box, const fs::path &predicted_box)
 {
-    string obj_type_str, obj_name, line;
+    string obj_name, line;
     int x_min_gt, y_min_gt, x_max_gt, y_max_gt;
     int x_min_pred, y_min_pred, x_max_pred, y_max_pred;
 
     ifstream dataset_file(dataset_box);
     ifstream pred_file(predicted_box);
-    
-    switch (obj_type){
-        case OBJTYPE::BOX:
-            obj_type_str = "004_sugar_box";
-            break;
-        case OBJTYPE::BOTTLE:
-            obj_type_str = "006_mustard_bottle";
-            break;
-        case OBJTYPE::DRILL:
-            obj_type_str = "035_power_drill";
-            break;
-        default:
-            throw invalid_argument("Unknown object type");
-    }
 
     if(dataset_file.is_open()){      // Check if the file opens correctly
         while(getline(dataset_file, line)){
@@ -152,49 +143,34 @@ int intersection_area(OBJTYPE obj_type, const fs::path &dataset_box, const fs::p
     return area_inters;
 }
 
-int union_area(OBJTYPE obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int union_area(string obj_type_str, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     int area_gt, area_pred, area_inters;
 
-    area_gt = box_area(obj_type, dataset_box);
-    area_pred = box_area(obj_type, predicted_box);
-    area_inters = intersection_area(obj_type, dataset_box, predicted_box);
+    area_gt = box_area(obj_type_str, dataset_box);
+    area_pred = box_area(obj_type_str, predicted_box);
+    area_inters = intersection_area(obj_type_str, dataset_box, predicted_box);
 
     int area = area_gt + area_pred - area_inters;
 
     return area;
 }
 
-float IoU(OBJTYPE obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+float IoU(string obj_type_str, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     int area_inters, area_union;
 
-    area_inters = intersection_area(obj_type, dataset_box, predicted_box);
-    area_union = union_area(obj_type, dataset_box, predicted_box);
+    area_inters = intersection_area(obj_type_str, dataset_box, predicted_box);
+    area_union = union_area(obj_type_str, dataset_box, predicted_box);
 
     float iou_value = area_inters / area_union;
 
     return iou_value;
 }
 
-int number_images(OBJTYPE obj_type, const fs::path &dataset_dir)
+int number_images(string obj_type_str, const fs::path &dataset_dir)
 {
     int file_count= 0;
-    string obj_type_str;
-
-    switch (obj_type){
-        case OBJTYPE::BOX:
-            obj_type_str = "004_sugar_box";
-            break;
-        case OBJTYPE::BOTTLE:
-            obj_type_str = "006_mustard_bottle";
-            break;
-        case OBJTYPE::DRILL:
-            obj_type_str = "035_power_drill";
-            break;
-        default:
-            throw invalid_argument("Unknown object type");
-    }
 
     const fs::path count_items = dataset_dir / obj_type_str / "test_images";    // Set the path where to count the number of files
 
@@ -231,24 +207,8 @@ int accuracy(float current_iou)
     return acc;
 }
 
-void write_performance(OBJTYPE obj_type, const fs::path &output_dir, const float mIoU, const float accuracy)
+void write_performance(string obj_type_str, const fs::path &output_dir, const float mIoU, const float accuracy)
 {
-    string obj_type_str;
-
-    switch (obj_type){
-        case OBJTYPE::BOX:
-            obj_type_str = "004_sugar_box";
-            break;
-        case OBJTYPE::BOTTLE:
-            obj_type_str = "006_mustard_bottle";
-            break;
-        case OBJTYPE::DRILL:
-            obj_type_str = "035_power_drill";
-            break;
-        default:
-            throw invalid_argument("Unknown object type");
-    }
-
     const std::string output_filename = obj_type_str + "-performance.txt";
     const fs::path output_filepath = output_dir / output_filename;
     std::fstream fs {output_filepath, std::ios::out};
