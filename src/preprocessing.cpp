@@ -2,17 +2,24 @@
 
 #include <enumobjtype.h>
 #include <iostream>
+#include <string>
 #include <preprocessing.h>
 #include "structuserreturn.h"
 
 using namespace std;
 
+
+// Ask user which object to detect and which directory to use as directory for objects
 USER_RETURN ask_user() {
 
     USER_RETURN result;
-    
-    // Default object directory dataset
-    result.directory = "object_detection_dataset";
+
+    // Select folder
+    string path;
+    cout << "\nInsert folder path (leave empty to use default):" << endl;
+    getline(cin, path);  // Allow empty input
+    result.directory = !path.empty() ? path : "object_detection_dataset";
+
 
     cout << "\nAvailable object types:" << endl;
     cout << "0 - Box (004_sugar_box)" << endl;
