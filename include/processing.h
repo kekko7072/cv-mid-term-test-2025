@@ -60,7 +60,8 @@ bool mk_output_dir(const std::filesystem::path &output_dir);
  * @param image Test image to be processed
  * @return Vector of two points (if object detected), or an empty vector
  */
-std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image);
+std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image,
+                                const std::filesystem::path &output_dir);
 
 /**
  * @brief write_image_output
