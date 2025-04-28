@@ -180,4 +180,35 @@ void crop_model_image(USER_RETURN user_return) {
             imwrite(output_path, cropped);  
         }
     }
+
+    // For each folder inside crop check if it has both files
+    fs::path my_path_cropped(folder_cropped);               
+    fs::directory_iterator it_cropped{ my_path_cropped, fs::directory_options::skip_permission_denied };
+
+    // iterate through subfolders
+    for (const auto& entry : it_cropped)
+    {
+        if (fs::is_directory(entry))
+        {
+            fs::path subfolder_path = entry.path();
+
+            fs::path color_file = subfolder_path / "color.png";
+            fs::path mask_file = subfolder_path / "mask.png";
+
+            bool has_color = fs::exists(color_file);
+            bool has_mask = fs::exists(mask_file);
+
+            if (!(has_color && has_mask))
+            {
+                std::cout << "Deleting folder: " << subfolder_path << std::endl;
+                std::error_code ec;
+                fs::remove_all(subfolder_path, ec);
+                if (ec)
+                {
+                    std::cerr << "Failed to delete " << subfolder_path << ": " << ec.message() << '\n';
+                }
+            }
+        }
+    }
+
 }
