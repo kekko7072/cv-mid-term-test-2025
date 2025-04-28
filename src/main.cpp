@@ -3,7 +3,7 @@
 
 #include "preprocessing.h"
 #include "processing.h"
-#include "measurements.h"
+#include "measurement.h"
 
 #include <iostream>
 #include <filesystem>
