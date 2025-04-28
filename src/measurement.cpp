@@ -38,7 +38,7 @@ void performance_evaluation(OBJTYPE obj_type, const fs::path &dataset_dir, const
     cout << "Accuracy: " << acc << endl;
 }
 
-int box_area(int obj_type, const fs::path &text_file)
+int box_area(OBJTYPE obj_type, const fs::path &text_file)
 {
     string obj_type_str, obj_name, line;      // obj_name to compare the name of the object we are evaluating, line to read one string at the time if there are more than one object in the text file
     int x_min, y_min, x_max, y_max;
@@ -79,7 +79,7 @@ int box_area(int obj_type, const fs::path &text_file)
     return area;
 }
 
-int intersection_area(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int intersection_area(OBJTYPE obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     string obj_type_str, obj_name, line;
     int x_min_gt, y_min_gt, x_max_gt, y_max_gt;
@@ -152,7 +152,7 @@ int intersection_area(int obj_type, const fs::path &dataset_box, const fs::path 
     return area_inters;
 }
 
-int union_area(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int union_area(OBJTYPE obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     int area_gt, area_pred, area_inters;
 
@@ -165,7 +165,7 @@ int union_area(int obj_type, const fs::path &dataset_box, const fs::path &predic
     return area;
 }
 
-float IoU(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+float IoU(OBJTYPE obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
 {
     int area_inters, area_union;
 
