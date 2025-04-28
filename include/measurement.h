@@ -21,28 +21,28 @@ void performance_evaluation (OBJTYPE obj_type, const std::filesystem::path &data
  * @param Text file where the coordinates of the box are saved
  * @return Value of the area
  */
-int box_area (int obj_type, const std::filesystem::path &text_file);
+int box_area (OBJTYPE obj_type, const std::filesystem::path &text_file);
 
 /**
  * @brief Find the intersection coordinates of the two boxes
  * @param Text file where the coordinates of the two box are saved
  * @return Coordinates of the intersection of the two boxes
  */
-int intersection_area (int obj_type, const std::filesystem::path &dataset_box, const std::filesystem::path &predicted_box);
+int intersection_area (OBJTYPE obj_type, const std::filesystem::path &dataset_box, const std::filesystem::path &predicted_box);
 
 /**
  * @brief Compute the union of the two boxes
  * @param Text file where the coordinates of the two box are saved
  * @return Value of the union of the two boxes
  */
-int union_area (int obj_type, const std::filesystem::path &dataset_box, const std::filesystem::path &predicted_box);
+int union_area (OBJTYPE obj_type, const std::filesystem::path &dataset_box, const std::filesystem::path &predicted_box);
 
 /**
  * @brief Compute the intersection over Union
  * @param Text file where the coordinates of the two box are saved
  * @return Value of the Intersection over Union
  */
-float IoU (int obj_type, const std::filesystem::path &dataset_box, const std::filesystem::path &predicted_box);
+float IoU (OBJTYPE obj_type, const std::filesystem::path &dataset_box, const std::filesystem::path &predicted_box);
 
 /**
  * @brief Count the number of images on that we are evaluating
