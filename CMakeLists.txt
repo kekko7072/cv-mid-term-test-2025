@@ -15,6 +15,7 @@ add_executable(detector
     src/main.cpp
     src/preprocessing.cpp
     src/processing.cpp
+    src/measurement.cpp
 )
 target_link_libraries(detector ${OpenCV_LIBS})
 
