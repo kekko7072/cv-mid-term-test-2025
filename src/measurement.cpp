@@ -1,18 +1,42 @@
 // Author: Marco Carraro
 
-#include "measurement.h"
 #include "enumobjtype.h"
+#include "measurement.h"
 
 #include <iostream>
 #include <fstream>  // Necessary to operate with text files
 #include <string>
 #include <sstream>  // Necessary to use istringstream
+#include <vector>
 
 namespace fs = std::filesystem;
 using namespace std;
 using std::cout;
 using std::cerr;
 using std::endl;
+
+void performance_evaluation(OBJTYPE obj_type, const fs::path &dataset_dir, const fs::path &predicted_dir)
+{
+    int number_of_files = number_images(obj_type, dataset_dir);
+
+    vector<float> iou(number_of_files);
+
+    int temp_acc = 0;
+    float miou, acc;
+
+    for(int i = 0; i < number_of_files; i++){
+        iou[i] = IoU(obj_type, dataset_dir, predicted_dir);
+        temp_acc = accuracy(iou[i]);
+    }
+
+    miou = mIoU(iou, number_of_files);
+    acc = temp_acc / number_of_files;
+
+    write_performance(obj_type, dataset_dir, miou, acc);
+
+    cout << "mean Intersection over Union: " << miou << endl;
+    cout << "Accuracy: " << acc << endl;
+}
 
 int box_area(int obj_type, const fs::path &text_file)
 {
@@ -153,10 +177,9 @@ float IoU(int obj_type, const fs::path &dataset_box, const fs::path &predicted_b
     return iou_value;
 }
 
-float mIoU(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int number_images(OBJTYPE obj_type, const fs::path &dataset_dir)
 {
     int file_count= 0;
-    float total_IoU = 0;
     string obj_type_str;
 
     switch (obj_type){
@@ -173,25 +196,43 @@ float mIoU(int obj_type, const fs::path &dataset_box, const fs::path &predicted_
             throw invalid_argument("Unknown object type");
     }
 
-    const fs::path count_items = dataset_box / obj_type_str / "test_images";    // Set the path where to count the number of files
+    const fs::path count_items = dataset_dir / obj_type_str / "test_images";    // Set the path where to count the number of files
 
     for(const auto &entry : fs::directory_iterator(count_items)){       // Count the number of files tested
         if(entry.is_regular_file()){
-            total_IoU = IoU(obj_type, dataset_box, predicted_box);
-            
             file_count++;
         }
     }
 
-    float mean_IoU = total_IoU / file_count;
+    return file_count;
+}
+
+float mIoU(vector<float> iou, int number_of_files)
+{
+    float total_IoU = 0;
+    
+    for(int i = 0; i < number_of_files; i++){
+        total_IoU = total_IoU + iou[i];
+    }
+
+    float mean_IoU = total_IoU / number_of_files;
     
     return mean_IoU;
 }
 
-float accuracy(int obj_type, const fs::path &dataset_box, const fs::path &predicted_box)
+int accuracy(float current_iou)
 {
-    int file_count= 0;
-    float acc = 0;
+    int acc = 0;
+    
+    if(current_iou > 0.5){
+        acc++;
+    }
+    
+    return acc;
+}
+
+void write_performance(OBJTYPE obj_type, const fs::path &output_dir, const float mIoU, const float accuracy)
+{
     string obj_type_str;
 
     switch (obj_type){
@@ -208,19 +249,12 @@ float accuracy(int obj_type, const fs::path &dataset_box, const fs::path &predic
             throw invalid_argument("Unknown object type");
     }
 
-    const fs::path count_items = dataset_box / obj_type_str / "test_images";    // Set the path where to count the number of files
-
-    for(const auto &entry : fs::directory_iterator(count_items)){       // Count the number of files tested
-        if(entry.is_regular_file()){
-            if(IoU(obj_type, dataset_box, predicted_box) > 0.5){
-                acc++;
-            }
-
-            file_count++;
-        }
-    }
-
-    acc = acc / file_count;
+    const std::string output_filename = obj_type_str + "-performance.txt";
+    const fs::path output_filepath = output_dir / output_filename;
+    std::fstream fs {output_filepath, std::ios::out};
     
-    return acc;
+    fs << obj_type_str << endl;
+    fs << "mean Intersection over Union" << " " << mIoU << endl;
+    fs << "Accuracy" << " " << accuracy;
+    fs << endl;
 }
