@@ -66,7 +66,7 @@ void process_images(OBJTYPE obj_type, const fs::path &data_dir)
 
     for (TestImage image : test_images)
     {
-        std::vector<cv::Point2i> bbox_coord = detect(cropped_models, image);
+        std::vector<cv::Point2i> bbox_coord = detect(cropped_models, image, output_dir);
         // bbox_coord contains two points (coordinates of the bounding box)
         write_image_output(output_dir, image, obj_type_str, bbox_coord);
     }
@@ -151,7 +151,8 @@ bool mk_output_dir(const fs::path &output_dir)
     return fs::create_directory(output_dir);
 }
 
-std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image)
+std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, const TestImage &image,
+                                const fs::path &output_dir)
 {
     cout << "Processing test image: " << image.id << endl;
 
@@ -181,7 +182,6 @@ std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, c
 //        cout << "matches " << matches.size() << endl;
         if (matches.size() >= num_good_matches)
         {
-//            cout << "if entered\n";
             num_good_matches = matches.size();
 
             // Localize the object
@@ -213,26 +213,25 @@ std::vector<cv::Point2i> detect(const std::vector<ModelImage> &cropped_models, c
             ymax = scene_corners[2].y;
             bbox_corners[0] = cv::Point2i(xmin, ymin);
             bbox_corners[1] = cv::Point2i(xmax, ymax);
-
-//            cv::Mat bbox = scene_img.clone();
-//            cv::rectangle(bbox, bbox_corners[0], bbox_corners[1], /*color=*/ cv::Scalar(0, 255, 0), /*thickness=*/ 4);
-//            cv::namedWindow("bbox", cv::WINDOW_NORMAL);
-//            cv::imshow("bbox", bbox);
-//            cv::waitKey(0);
         }
-
-
     }
-    // Draw matches
-//            cv::Mat img_matches;
-//            cv::drawMatches(obj_img, keypoints_obj, scene_img, keypoints_scene, matches, img_matches,
-//                            cv::Scalar::all(-1), cv::Scalar::all(-1),
-//                            std::vector<char>()/*, DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS*/);
-    //        cv::Point2f offset {static_cast<float>(obj_img.cols), 0};
-    //        cv::rectangle(img_matches, scene_corners[0] + offset, scene_corners[2] + offset,
-    //                      /*color=*/ cv::Scalar(0, 255, 0), /*thickness=*/ 4);
+    // Print image
+    cv::Mat bbox = image.img.clone();
+    cv::rectangle(bbox, bbox_corners[0], bbox_corners[1], /*color=*/ cv::Scalar(0, 255, 0), /*thickness=*/ 4);
+    std::string text = cropped_models[0].obj_type_str;
+    cv::putText(bbox, text, cv::Point2i(0, 40), cv::HersheyFonts::FONT_HERSHEY_SIMPLEX,
+                1.5, cv::Scalar(0, 0, 255), 4);
+//    cv::namedWindow("bbox", cv::WINDOW_NORMAL);
+//    cv::imshow("bbox", bbox);
+//    cv::waitKey(0);
+    const fs::path out_images_dir = output_dir / "images";
+    if (mk_output_dir(out_images_dir))
+    {
+        std::string out_image_filename = image.id + "_bbox.png";
+        const fs::path out_image_path = out_images_dir / out_image_filename;
+        cv::imwrite(out_image_path.string(), bbox);
+    }
 
-//    cout << "returning bbox_corners = [" << bbox_corners[0] << ", " << bbox_corners[1] << "]\n";
     return bbox_corners;
 }
 
