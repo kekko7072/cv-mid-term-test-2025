@@ -49,3 +49,7 @@ _deps
 
 # Build
 build/
+
+# Generated output
+cropped/
+output/
