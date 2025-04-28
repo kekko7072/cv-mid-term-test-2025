@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     process_images(object_type.type, object_type.directory);
 
     // Performance measurements
-    performance_evaluation(object_type.directory, "");
+    performance_evaluation(object_type.type, object_type.directory);
     
     return 0;
 }
