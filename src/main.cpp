@@ -3,6 +3,7 @@
 
 #include "preprocessing.h"
 #include "processing.h"
+#include "measurements.h"
 
 #include <iostream>
 #include <filesystem>
@@ -20,13 +21,13 @@ int main(int argc, char *argv[])
 {
     // Preprocessing
     USER_RETURN object_type = ask_user();
-    cout << "\nSelected object type: " << static_cast<int>(object_type.type) << endl;
-    cout << "Directory: " << object_type.directory << endl;
+    crop_model_image(object_type);
     
     // Processing
     process_images(object_type.type, object_type.directory);
 
     // Performance measurements
-
+    performance_evaluation(object_type.directory, "");
+    
     return 0;
 }
