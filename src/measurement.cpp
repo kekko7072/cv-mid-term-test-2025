@@ -109,17 +109,21 @@ int intersection_area(int obj_type, const fs::path &dataset_box, const fs::path 
     }
     
     int x_inters_min, y_inters_min, x_inters_max, y_inters_max;
-    int width_inters, height_inters;
+    int width_inters, height_inters, area_inters;
 
     x_inters_min = min(x_min_gt, x_min_pred);
     y_inters_min = min(y_min_gt, y_min_pred);
     x_inters_max = max(x_max_gt, x_max_pred);
     y_inters_max = max(y_max_gt, y_max_pred);
 
-    width_inters = x_inters_max - x_inters_min;
-    height_inters = y_inters_max - y_inters_min;
+    if((x_inters_min > x_inters_max) || (y_inters_min > y_inters_max)){     // Check if there is an intersection
+        area_inters = 0;
+    } else{
+        width_inters = x_inters_max - x_inters_min;
+        height_inters = y_inters_max - y_inters_min;
 
-    int area_inters = width_inters * height_inters;
+        area_inters = width_inters * height_inters;
+    }
 
     return area_inters;
 }
